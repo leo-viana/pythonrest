@@ -23,7 +23,7 @@ def get_sa_row_attr_object(row_attr, attr_params):
         'number': get_number_list(),
         'boolean': get_boolean_list(),
         'array': get_array_list(),
-    }.items() if ('sa.' not in attr_params[0]) or (list(parse('sa.{}', attr_params[0]))[0].split('(')[0] in value_list)), 'object')
+        'object': []  # Currently, no object list match up is used for Swagger or Redoc
     }.items() if list(parse('sa.{}', attr_params[0]))[0].split('(')[0] in value_list), 'string')
 
     # Check attribute characteristics
