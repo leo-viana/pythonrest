@@ -206,9 +206,9 @@ def put_object_set(request_data, declarative_meta, id_name_list):
                     )
 
                     for error in insert_result:
-                        if 'Duplicate entry' in error:
+                        if 'Duplicate entry' in str(error):
                             error_status_code = 409
-                        if 'cannot be null' in error:
+                        if 'cannot be null' in str(error):
                             error_status_code = 406
                     continue
 
@@ -283,7 +283,7 @@ def put_object_set(request_data, declarative_meta, id_name_list):
                             )
                         )
                         for error in insert_result:
-                            if 'cannot be null' in error:
+                            if 'cannot be null' in str(error):
                                 error_status_code = 406
                     continue
                 pk_only = next(
@@ -306,7 +306,7 @@ def put_object_set(request_data, declarative_meta, id_name_list):
                             )
                         )
                         for error in insert_result:
-                            if 'cannot be null' in error:
+                            if 'cannot be null' in str(error):
                                 error_status_code = 406
                     continue
                 # Executing update block #

@@ -66,7 +66,7 @@ def get_sa_MaSQL_dict_types_list():
     return []
 
 
-######################################################################################################################## SaMySQLTypes
+################################################ SaMySQLTypes - MySQL #################################################
 def get_sa_MySQL_string_types_list():
     return ['String', 'TIMESTAMP', 'timestamp', 'TIME', 'Time', 'Date', 'JSON', 'DateTime',
             'CHAR',  'DATE', 'DATETIME', 'Enum', 'Set', 'Interval', 'NCHAR', 'NVARCHAR', "YEAR", "year",
@@ -130,7 +130,7 @@ def get_sa_OcSQL_dict_types_list():
     return []
 
 
-######################################################################################################################## SaPgSQLTypes
+################################################ SaPgSQLTypes - PostgreSQL ############################################
 def get_sa_PgSQL_string_types_list():
     return ['character varying', 'char', 'bpchar', 'BLOB', 'character', 'varchar', 'Binary', 'interval', 'enum', 'ENUM',
             'name', 'CLOB', 'DATE', 'DATETIME', 'Enum', 'Interval', 'LargeBinary', 'time', 'time with time zone',
@@ -169,9 +169,11 @@ def get_sa_PgSQL_dict_types_list():
     return []
 
 
-######################################################################################################################## SaSeSQLTypes
+################################################ SaSeSQLTypes  - SQLServer ############################################
 def get_sa_SeSQL_string_types_list():
-    return ['char', 'varchar', 'text', 'nchar', 'nvarchar', 'ntext', 'date', 'smalldatetime', 'datetime', 'datetime2', 'datetimeoffset', 'time']
+    return ['char', 'varchar', 'text', 'nchar', 'nvarchar', 'ntext', 'date', 'smalldatetime', 'datetime', 'datetime2',
+            'datetimeoffset', 'time', 'timestamp', 'uniqueidentifier', 'geography', 'geometry', 'hierarchyid',
+            'sql_variant', 'xml']
 
 
 def get_sa_SeSQL_bytes_types_list():
@@ -197,13 +199,11 @@ def get_sa_SeSQL_list_types_list():
 def get_sa_SeSQL_dict_types_list():
     return []
 
-########################################################################################################################
-
-
+################################# SQLAlchemy Types Classes to be imported as sa.<Type> ################################
 def get_sa_string_types_list():
     return ['String', 'TIMESTAMP', 'timestamp', 'TIME', 'Time', 'Date', 'JSON', 'jsonb', 'JSONB' 'DateTime',
             'CHAR',  'DATE', 'DATETIME', 'Enum', 'Set', 'Interval', 'NCHAR', 'NVARCHAR', 'UUID',
-            'TEXT', 'Text', 'Unicode', 'UnicodeText', 'VARCHAR', "YEAR", "year"]
+            'TEXT', 'Text', 'Unicode', 'UnicodeText', 'VARCHAR', "YEAR", "year", "uniqueidentifier"]
 
 
 def get_sa_bytes_types_list():

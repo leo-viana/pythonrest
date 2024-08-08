@@ -114,7 +114,8 @@ def generate(
             os.makedirs(generated_domains_path)
             generate_domain_files(result_full_path, generated_domains_path)
             # PythonRest API Generation
-            generate_python_rest_api(result_full_path, generated_domains_path, us_datetime, 'pgsql', postgres_params, base_project_exists)
+            generate_python_rest_api(result_full_path, generated_domains_path, us_datetime, 'pgsql', postgres_params,
+                                     base_project_exists, project_name)
         except Exception as e:
             typer.echo(e)
             return
@@ -136,7 +137,8 @@ def generate(
             os.makedirs(generated_domains_path)
             generate_domain_files(result_full_path, generated_domains_path)
             # PythonRest API Generation
-            generate_python_rest_api(result_full_path, generated_domains_path, us_datetime, 'mssql', sqlserver_params, base_project_exists)
+            generate_python_rest_api(result_full_path, generated_domains_path, us_datetime, 'mssql', sqlserver_params,
+                                     base_project_exists, project_name)
         except Exception as e:
             typer.echo(e)
             return

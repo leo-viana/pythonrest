@@ -27,20 +27,14 @@ CREATE TABLE [variations_table] (
     unique_col VARCHAR(20) NULL UNIQUE,
     binary_col VARBINARY(30) NULL,
     unsigned_col INT NULL,
-    generated_col AS (CONCAT(not_null_col, '-', unique_col)) PERSISTED,
     default_expression_bool_column TINYINT NULL DEFAULT 1,
     not_null_unique_col VARCHAR(50) NOT NULL UNIQUE,
     not_null_binary_col VARBINARY(60) NOT NULL,
     not_null_int_col INT NOT NULL,
-    not_null_auto_generated_col AS (not_null_int_col + 1) PERSISTED,
     not_null_unique_varbinary_col VARBINARY(70) NOT NULL,
-    not_null_unique_generated_col AS (UPPER(not_null_unique_col)) PERSISTED,
-    not_null_unique_binary_generated_col AS (LOWER(not_null_unique_varbinary_col)) PERSISTED,
     not_null_unique_binary_generated_default_value_col VARCHAR(100) NULL DEFAULT 'DEFAULT',
     unique_varbinary_col VARBINARY(200) NULL UNIQUE,
     nullable_int_col INT NULL,
-    reverse_unique_generated_col AS (REVERSE(unique_col)) PERSISTED,
-    varbinary_generated_col AS (CONVERT(VARBINARY(500), unique_varbinary_col)) PERSISTED,
     datetime_default_value DATETIME NULL DEFAULT '1970-01-01 00:00:00'
 );
 
@@ -53,19 +47,23 @@ CREATE TABLE [string_table] (
     id_string_table UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
     char_col CHAR(36) NULL UNIQUE,
     varchar_col VARCHAR(100) NULL UNIQUE,
-    nvarchar_col NVARCHAR(100),
-    ntext_col NTEXT,
-    nchar_col NCHAR(50),
-    binary_col BINARY(100),
-    image_col IMAGE,
-    varbinary_max_col VARBINARY(MAX) NULL,
-    varbinary_col VARBINARY(1000) NULL UNIQUE,
-    blob_col VARBINARY(MAX) NULL,
+    varchar_max_col VARCHAR(MAX) NULL,
     text_col TEXT,
+    nchar_col NCHAR,
+    nchar_fixed_col NCHAR(50),
+    nvarchar_col NVARCHAR(100),
+    nvarchar_max_col NVARCHAR(MAX),
+    ntext_col NTEXT,
+    binary_col BINARY(100),
+    varbinary_col VARBINARY NULL UNIQUE,
+    varbinary_fixed_col VARBINARY(1000) NULL UNIQUE,
+    varbinary_max_col VARBINARY(MAX) NULL,
+    image_col IMAGE,
+    blob_col VARBINARY(MAX) NULL,
     enum_col VARCHAR(10) CHECK (enum_col IN ('enum1', 'enum2')) NULL,
     set_col VARCHAR(10) CHECK (set_col IN ('set1', 'set2')) NULL,
     variations_table_id BIGINT NOT NULL,
-    CONSTRAINT fk_string_table_variations_table FOREIGN KEY (variations_table_id) 
+    CONSTRAINT fk_string_table_variations_table FOREIGN KEY (variations_table_id)
         REFERENCES [variations_table] (id_variations_table)
 );
 
@@ -75,23 +73,19 @@ GO
 
 CREATE TABLE [numeric_table] (
     id_numeric_table BIGINT NOT NULL PRIMARY KEY,
-    int_col INT NULL,
-    mediumint_col INT NULL,
-    smallint_col SMALLINT NULL,
+    bit_col BIT NULL,
     tinyint_col TINYINT NULL,
+    smallint_col SMALLINT NULL,
+    int_col INT NULL,
     bool_col TINYINT NULL,
     decimal_col DECIMAL(18, 2) NULL,
-    decimal_variable_col DECIMAL(13, 2) NULL,
-    float_col REAL NULL,
-    float_variable_col FLOAT(3) NULL,
-    real_col REAL NULL,
-    double_col FLOAT(53) NULL,
-    numeric_col NUMERIC NULL,
-    bit_col BIT NULL,
-    money_col MONEY,
+    numeric_col NUMERIC(18, 18) NULL,
     smallmoney_col SMALLMONEY,
+    money_col MONEY,
+    float_col FLOAT(3) NULL,
+    real_col REAL NULL,
     variations_table_id BIGINT NOT NULL,
-    CONSTRAINT fk_numeric_table_variations_table FOREIGN KEY (variations_table_id) 
+    CONSTRAINT fk_numeric_table_variations_table FOREIGN KEY (variations_table_id)
         REFERENCES [variations_table] (id_variations_table)
 );
 
@@ -101,14 +95,13 @@ GO
 
 CREATE TABLE [date_and_time_table] (
     id_date_and_time_table UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+    datetime_col DATETIME NULL,
+    datetime2_col DATETIME2,
+    smalldatetime_col SMALLDATETIME,
     date_col DATE NULL,
     time_col TIME NULL,
-    datetime_col DATETIME NULL,
-    timestamp_col DATETIME NULL,
-    smalldatetime_col SMALLDATETIME,
-    datetime2_col DATETIME2(3),
-    datetimeoffset_col DATETIMEOFFSET(3),
-    year_col SMALLINT NULL,
+    datetimeoffset_col DATETIMEOFFSET,
+    timestamp_col TIMESTAMP NULL,
     variations_table_id BIGINT NULL,
     numeric_table_id BIGINT NOT NULL,
     CONSTRAINT fk_date_and_time_table_variations_table FOREIGN KEY (variations_table_id) 

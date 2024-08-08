@@ -24,5 +24,5 @@ docker exec -it sql-server-database-mapper /opt/mssql-tools/bin/sqlcmd -S localh
 
 The pythonrest command to generate the API for this database is:
 ```
-pythonrest generate --sqlserver-connection-string mssql://sa:24ad0a77-c59b-4479-b508-72b83615f8ed@locahost:1433/database_mapper_sqlserver
+pythonrest generate --sqlserver-connection-string mssql://sa:24ad0a77-c59b-4479-b508-72b83615f8ed@localhost:1433/database_mapper_sqlserver
 ```

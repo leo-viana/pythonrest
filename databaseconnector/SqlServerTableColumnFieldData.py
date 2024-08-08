@@ -33,5 +33,7 @@ def handler_sa_value(sa_type, character_length, numeric_precision, numeric_scale
         return 'VARCHAR'
     if sa_type == 'NUMERIC' and numeric_precision is not None and numeric_scale is not None:
         return f'{sa_type}({numeric_precision}, {numeric_scale})'
+    if sa_type.lower() == 'uniqueidentifier':
+        return 'Uuid'
     else:
         return sa_type
