@@ -11,6 +11,7 @@ def install_sql_route(result, script_absolute_path):
 
 
 def install_sql_swagger(result, script_absolute_path):
+    print('Adding SQL swagger')
     with open(os.path.join(result, 'config', 'swagger.yaml'), 'r') as yaml_in:
         swagger_dict = yaml.safe_load(yaml_in)
     with open(os.path.join(script_absolute_path, 'apigenerator/resources/2 - Swagger/yaml/sql.yaml'), 'r') as sql_in:

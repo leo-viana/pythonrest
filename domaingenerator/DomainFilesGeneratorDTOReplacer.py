@@ -55,8 +55,7 @@ def get_column_arguments_string(column):
         arguments_string = arguments_string + ', nullable=False'
     if column['unique']:
         arguments_string = arguments_string + ', unique=True'
-    if column['auto_increment']:
-        arguments_string = arguments_string + ', autoincrement=True'
+    arguments_string = arguments_string + f', autoincrement={column["auto_increment"]}'
     if column['default_value'] is not None:
         arguments_string = arguments_string + ', server_default=sa.FetchedValue()'
     return arguments_string

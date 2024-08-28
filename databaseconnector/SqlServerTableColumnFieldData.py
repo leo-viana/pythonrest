@@ -16,12 +16,14 @@ class SqlServerTableColumnFieldData:
             column_metadata['DATA_TYPE'][:column_metadata['DATA_TYPE'].index(' ')], self.python_type, 'SeSQL'), column_metadata['CHARACTER_MAXIMUM_LENGTH'], column_metadata['NUMERIC_PRECISION'], column_metadata['NUMERIC_SCALE'])
 
         self.default_value = handle_default_value(
-            column_metadata['COLUMN_DEFAULT'], self.python_type)
+            column_metadata['COLUMN_DEFAULT'], self.python_type, self.auto_increment)
 
 
-def handle_default_value(default_value, python_type):
+def handle_default_value(default_value, python_type, auto_increment):
     if python_type == 'bool' and default_value is not None:
         return False if default_value == '0' else True
+    if default_value is not None and auto_increment == False:
+        return default_value
 
 
 def handler_sa_value(sa_type, character_length, numeric_precision, numeric_scale):

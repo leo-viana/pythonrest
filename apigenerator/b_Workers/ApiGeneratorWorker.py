@@ -34,7 +34,6 @@ def generate_python_rest_api(result_full_path, generated_domains_path, us_dateti
         # ------------------------------- Project Finalizer ------------------------------- #
         if not base_project_exists:
             finalize_project(result_full_path, script_absolute_path)
-        print('Adding SQL swagger')
         install_sql_swagger(result_full_path, script_absolute_path)
 
         # ----------------------------- Environment Variables ----------------------------- #

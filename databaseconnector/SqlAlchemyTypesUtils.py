@@ -177,7 +177,7 @@ def get_sa_SeSQL_string_types_list():
 
 
 def get_sa_SeSQL_bytes_types_list():
-    return ['binary', 'varbinary', 'image']
+    return []
 
 
 def get_sa_SeSQL_int_types_list():
@@ -198,6 +198,9 @@ def get_sa_SeSQL_list_types_list():
 
 def get_sa_SeSQL_dict_types_list():
     return []
+
+def get_sa_SeSQL_unsupported_types_list():
+    return ['binary', 'varbinary', 'image']
 
 ################################# SQLAlchemy Types Classes to be imported as sa.<Type> ################################
 def get_sa_string_types_list():
@@ -297,10 +300,10 @@ def convert_set_to_SET(input_string):
 
 
 def handle_sql_to_sa_types_conversion(column_type):
-    if "enum" in column_type.lower():
+    if column_type.lower().startswith("enum"):
         converted_column_type = convert_enum_to_Enum(column_type)
         return converted_column_type
-    if "set" in column_type.lower():
+    if column_type.lower().startswith("set"):
         converted_column_type = convert_set_to_SET(column_type)
         return converted_column_type
     # TODO remove this when float type casting to Decimal or a way to send data of decimal type on requests is supported by PythonREST

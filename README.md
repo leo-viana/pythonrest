@@ -744,25 +744,19 @@ Run from the root folder:
 pip install .
 ```
 This will use the setup.py from the root folder to build a library of the pythonrest on the site-packages of the Python folder.
-One thing worth noting is that if you need to add a new folder to the project, e.g. apigenerator/c_NewFolder
-you need to add a new entry to the list of the packages property in the setup.py, like this:
-```python
-'pythonrest.apigenerator.c_NewFolder',
-```
-And if that folder has files that are not of .py extension, e.g. apigenerator/c_NewFolder/new.yaml and 
-apigenerator/c_NewFolder/new2.yaml, you need to add a new entry to the list of the package_data property in the 
-setup.py, like this:
-```python
-'pythonrest.apigenerator.c_NewFolder': ['new.yaml', 'new2.yaml'],
-```
-All of this must be done to successfully add those files to the pip generated and installed library
+Two things worth noting when creating features/fixing bugs on this project:
+1. Any new folders added to the project must include an __init__.py file in them, because that way the setup.py 
+find_packages function may find and add that folder to the pip package.
+2. Any new files with extensions not being sent to the list_files_by_extension function of the setup.py, must be 
+therefore so they can be built onto the pip package.
+
 To uninstall the local pip package, you can just use a common pip uninstall command:
 ```commandline
 pip uninstall pythonrest3
 ```
-When reinstalling the local pip package for tests, make sure to delete the build folder generated on the root folder of the project,
-as retaining that folder can lead to the project being built using that folder and not catching any changes you made to
-the project files.
+When reinstalling the local pip package for tests, make sure to delete the build and the pythonrest3.egg-info folders 
+generated on the root folder of the project, as retaining those can lead to the project being built using those cached 
+folders instead of any changes you made to the project files.
 
 <br></br>
 ## If you find our solution helpful, consider donating on our [Patreon campaign](https://www.patreon.com/seventechnologies)!

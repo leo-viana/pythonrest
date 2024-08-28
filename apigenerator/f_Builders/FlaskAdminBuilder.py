@@ -69,7 +69,8 @@ def generate_flask_admin_files(result, project_domain_folder, domain_files, data
     database_mapper = {
         "mysql": "MySql",
         "pgsql": "PgSql",
-        "mssql": "MsSql"
+        "mssql": "MsSql",
+        "mariadb": "MariaDb"
     }
 
     for domain_file in domain_files:
