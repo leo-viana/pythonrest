@@ -1,7 +1,9 @@
-# Importing UUID module #
+# System Imports
 import os
-import uuid6
 import datetime
+
+# Importing UUID modules #
+import uuid6
 from ulid import ULID
 
 
@@ -19,6 +21,8 @@ def generate_guid():
     # tries to get the key of the variable, otherwise defaults to getting the uuid key
     return id_generators.get(id_generation_method, id_generators['uuid'])()
 
+def generate_uuid():
+    return str(uuid6.uuid7())
 
 # Method that casts any parameter to string #
 def stringify(param):
