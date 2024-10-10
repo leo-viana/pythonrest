@@ -28,7 +28,6 @@ Below is the command to create a python venv:
       ```commandline
       pip install -r requirements.txt
       ```
-
 4. Run app.py
 
     After completing libraries installation, you can use the below command to run the project:
@@ -76,6 +75,14 @@ Below is the command to create a python venv:
     From there you can access the URL localhost:5000, which is the base endpoint to go to the project routes and make requests following the **API Usage Examples** section on this readme, our [blog](https://medium.com/@seventechnologiescloud/) and documentation at[readthedocs](https://readthedocs.org/projects/pythonrest/) 
 
 <br>
+
+## Add Environment Variables to use flask admin panel
+
+    To access the administration panel you have to add the two environment variables below:
+    ```
+    os.environ['admin_panel_user'] = 'admin'
+    os.environ['admin_panel_password'] = 'admin'
+    ```
 
 ## Run and Debug Using VENV on VSCode
 If you wish to go deep and debug the API, or simply wishes to run from VSCode Python extension, you'll want to configure

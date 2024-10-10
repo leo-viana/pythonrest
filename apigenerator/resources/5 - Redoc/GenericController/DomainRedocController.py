@@ -12,4 +12,3 @@ def meta_string_spec():
     with open(yaml_path, 'r') as yaml_file:
         yaml_content = yaml_file.read()
     return yaml_content
-
