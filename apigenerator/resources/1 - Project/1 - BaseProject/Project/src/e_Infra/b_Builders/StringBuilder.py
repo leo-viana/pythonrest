@@ -24,6 +24,9 @@ def generate_guid():
 def generate_uuid():
     return str(uuid6.uuid7())
 
+def generate_ulid():
+    return str(ULID.from_datetime(datetime.datetime.now()))
+
 # Method that casts any parameter to string #
 def stringify(param):
     return str(param)

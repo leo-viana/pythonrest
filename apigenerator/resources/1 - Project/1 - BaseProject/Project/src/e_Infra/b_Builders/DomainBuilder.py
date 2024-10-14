@@ -198,7 +198,8 @@ def apply_query_selecting_multiple_values(query, query_param, key, declarative_m
 
 
 def auto_fill_guid_in_request_body(declarative_meta, dictionary):
-    auto_fill_guid_allowed_types = {'CHAR(36)', 'UUID', 'VARCHAR(36)'}
+    auto_fill_guid_allowed_types = {'CHAR(36)', 'UUID', 'VARCHAR(36)', 'CHAR(26)', 'VARCHAR(26)'}
+    auto_fill_ulid_allowed_types = {'CHAR(26)', 'VARCHAR(26)'}
     auto_fill_guid_allowed_python_types = {str(uuid.UUID)}
     ins = inspect(declarative_meta)
     for column in ins.tables[0].columns:
@@ -206,6 +207,8 @@ def auto_fill_guid_in_request_body(declarative_meta, dictionary):
             if column.name not in dictionary:
                 if str(column.type) == 'UUID' or str(column.type.python_type) == str(uuid.UUID):
                     dictionary[column.name] = generate_uuid()
+                elif str(column.type) in auto_fill_ulid_allowed_types:
+                    dictionary[column.name] = generate_ulid()
                 elif str(column.type) in auto_fill_guid_allowed_types or str(column.type.python_type) in auto_fill_guid_allowed_python_types:
                     dictionary[column.name] = generate_guid()
 

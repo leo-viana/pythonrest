@@ -153,7 +153,7 @@ def get_sa_PgSQL_int_types_list():
 
 
 def get_sa_PgSQL_float_types_list():
-    return ['Float', 'DECIMAL', 'FLOAT', 'NUMERIC', 'Numeric', 'REAL']
+    return ['Float', 'DECIMAL', 'FLOAT', 'NUMERIC', 'Numeric', 'REAL', 'double precision']
 
 
 def get_sa_PgSQL_bool_types_list():
@@ -171,8 +171,7 @@ def get_sa_PgSQL_dict_types_list():
 ################################################ SaSeSQLTypes  - SQLServer ############################################
 def get_sa_SeSQL_string_types_list():
     return ['char', 'varchar', 'text', 'nchar', 'nvarchar', 'ntext', 'date', 'smalldatetime', 'datetime', 'datetime2',
-            'datetimeoffset', 'time', 'timestamp', 'uniqueidentifier', 'geography', 'geometry', 'hierarchyid',
-            'sql_variant', 'xml']
+            'time', 'uniqueidentifier', 'smallmoney', 'xml', 'money']
 
 
 def get_sa_SeSQL_bytes_types_list():
@@ -180,11 +179,11 @@ def get_sa_SeSQL_bytes_types_list():
 
 
 def get_sa_SeSQL_int_types_list():
-    return ['bigint', 'numeric', 'bit', 'smallint', 'decimal', 'smallmoney', 'int', 'tinyint']
+    return ['bigint', 'bit', 'smallint', 'int', 'tinyint']
 
 
 def get_sa_SeSQL_float_types_list():
-    return ['float', 'real']
+    return ['float', 'numeric', 'decimal', 'real']
 
 
 def get_sa_SeSQL_bool_types_list():
@@ -199,7 +198,8 @@ def get_sa_SeSQL_dict_types_list():
     return []
 
 def get_sa_SeSQL_unsupported_types_list():
-    return ['binary', 'varbinary', 'image']
+    return ['binary', 'varbinary', 'image', 'datetimeoffset', 'timestamp', 'geography', 'geometry', 'hierarchyid',
+            'sql_variant']
 
 ################################# SQLAlchemy Types Classes to be imported as sa.<Type> ################################
 def get_sa_string_types_list():
@@ -298,7 +298,7 @@ def convert_set_to_SET(input_string):
     return set_declaration
 
 
-def handle_sql_to_sa_types_conversion(column_type):
+def handle_sql_to_sa_types_conversion(column_type, database):
     if column_type.lower().startswith("enum"):
         converted_column_type = convert_enum_to_Enum(column_type)
         return converted_column_type
@@ -312,7 +312,7 @@ def handle_sql_to_sa_types_conversion(column_type):
         return "String"
     if "jsonb" in column_type.lower():
         return "JSON"
-    if "money" in column_type.lower():
+    if column_type.lower().startswith("money") and database == "PgSQL": # TODO remove this when MONEY types are fully supported by PythonREST on SQLServer databases
         return "MONEY"
 
 
@@ -334,7 +334,7 @@ def get_sa_type(column_type, python_type_value, database):
     types_list_object = {'str': str_type_list, 'bytes': bytes_type_list, 'int': int_type_list, 'float': float_type_list,
                          'bool': bool_type_list, 'list': list_type_list, 'dict': dict_type_list}
 
-    converted_type = handle_sql_to_sa_types_conversion(column_type)
+    converted_type = handle_sql_to_sa_types_conversion(column_type, database)
 
     if converted_type is not None:
         return converted_type
@@ -349,6 +349,3 @@ def get_sa_type(column_type, python_type_value, database):
                 else:
                     result = add_size_to_result(result, column_type)
             return result
-
-    # Caso o tipo de dado não seja encontrado, sair com mensagem de erro
-    sys.exit(f'Tipo de coluna não suportado: {column_type}')
