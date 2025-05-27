@@ -1,6 +1,17 @@
 # System Imports #
 import sys
 import os
+
+def initialize_requirements_file(file_path):
+    # Creates or overwrites the requirements.txt with FastAPI core dependencies
+    core_dependencies = [
+        "fastapi",
+        "uvicorn[standard]"
+    ]
+    with open(file_path, 'w') as file:
+        for dep in core_dependencies:
+            file.write(dep + '\n')
+    print(f"Initialized {file_path} with FastAPI core dependencies.")
 import shutil
 from apigenerator.e_Enumerables.Enumerables import *
 import importlib.metadata
@@ -63,6 +74,11 @@ def copy_proj_base_dir(result_full_path, symlinks=False, ignore=None):
             shutil.copytree(src_folder, dst_folder, symlinks, ignore)
         else:
             shutil.copy2(src_folder, dst_folder)
+
+    # Initialize requirements.txt for the generated project
+    generated_requirements_path = os.path.join(result_full_path, "requirements.txt")
+    initialize_requirements_file(generated_requirements_path)
+    print(f"Initialized requirements.txt at {generated_requirements_path}")
 
 
 # Method copies domain files into proper folder of result hierarchy #
@@ -146,12 +162,12 @@ def check_if_base_project_exists(result_full_path):
         'src/a_Presentation/a_Domain',
         'src/b_Application/b_Service/a_Domain',
         'src/d_Repository/a_Domain',
-        'src/a_Presentation/d_Swagger',
+        'src/a_Presentation/d_Swagger', # This directory might be empty or removed later if not used by FastAPI
         'src/e_Infra/d_Validators/a_Domain',
         'src/e_Infra/g_Environment',
-        'src/e_Infra/b_Builders/FlaskBuilder.py',
+        # 'src/e_Infra/b_Builders/FlaskBuilder.py', # Removed FlaskBuilder check
         'config',
-        'app.py'
+        'app.py' # app.py is now FastAPI based
     ]
 
     # Check if all directories and files exist

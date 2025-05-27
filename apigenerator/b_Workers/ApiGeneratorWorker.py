@@ -29,11 +29,11 @@ def generate_python_rest_api(result_full_path, generated_domains_path, us_dateti
 
         # ------------------------------------ Domain ------------------------------------ #
 
-        handle_domain_migration_multiple_swagger_files(result_full_path, proj_domain_folder, script_absolute_path,
-                                                       project_name)
+        # handle_domain_migration_multiple_swagger_files(result_full_path, proj_domain_folder, script_absolute_path,
+        #                                                project_name) # Legacy domain Swagger merging is now skipped
 
-        modify_swagger_related_files(
-            result_full_path, proj_domain_folder, script_absolute_path)
+        # modify_swagger_related_files(
+        #     result_full_path, proj_domain_folder, script_absolute_path) # Legacy Swagger file modification is now skipped
 
         modify_exceptional_types_in_domain_files(db, proj_domain_folder, result_full_path)
 
@@ -53,11 +53,11 @@ def generate_python_rest_api(result_full_path, generated_domains_path, us_dateti
                 result_full_path, us_datetime, db, db_params, script_absolute_path, uid_type)
 
         # ---------------------------------- Flask-Admin ---------------------------------- #
-        build_flask_admin_files(result_full_path, proj_domain_folder, script_absolute_path, db)
+        # build_flask_admin_files(result_full_path, proj_domain_folder, script_absolute_path, db) # Flask-Admin generation is now skipped
 
         # ------------------------------------ Redoc -------------------------------------- #
-        modify_redoc_related_files(
-            result_full_path, proj_domain_folder, script_absolute_path)
+        # modify_redoc_related_files(
+        #     result_full_path, proj_domain_folder, script_absolute_path) # Legacy Redoc file modification is now skipped
     except Exception as e:
         print(e)
         return
