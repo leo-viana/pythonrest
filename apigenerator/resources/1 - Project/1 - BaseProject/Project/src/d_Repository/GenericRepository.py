@@ -501,5 +501,27 @@ def delete_set_by_full_match(request_data, declarative_meta):
 
 
 # Executes a stored procedure on the database #
-def execute_sql_stored_procedure(stored_procedure_name, stored_procedure_args):
+def call_db_specific_procedure(stored_procedure_name, stored_procedure_args):
     return execute_sql_stored_procedure(stored_procedure_name, stored_procedure_args)
+
+
+# Method that retrieves a result list from database
+def get_result_list(result, cursor):
+    # Retrieving list of fields name #
+    field_names = [i[0] for i in cursor.description]
+
+    # Initializing result list #
+    result_list = list()
+
+    # Iterating over result #
+    for result_object in result:
+        # Creating new column dictionary #
+        new_object = dict()
+        # Iterating over field names #
+        for i in range(len(field_names)):
+            # Constructing column dict with field name #
+            new_object[field_names[i]] = result_object[i]
+        # Appending column dict in result list #
+        result_list.append(new_object)
+    # Returning result list #
+    return result_list

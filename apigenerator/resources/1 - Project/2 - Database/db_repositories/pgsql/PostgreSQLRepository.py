@@ -33,8 +33,8 @@ def execute_sql_stored_procedure(stored_procedure_name, stored_procedure_args):
         in_values = ', '.join(
             [f"'{value}'" for value in stored_procedure_args.get("in", [])])
 
-        # For PostgreSQL, we call a function that returns a result set
-        call_proc = text(f"SELECT * FROM {stored_procedure_name}({in_values})")
+        # For PostgreSQL, we use CALL
+        call_proc = text(f"CALL {stored_procedure_name}({in_values})")
 
         try:
             stored_procedure_result = con.execute(call_proc)
