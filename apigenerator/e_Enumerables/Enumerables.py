@@ -16,6 +16,7 @@ def get_directory_data():
     data['db_dependencies'] = "apigenerator/resources/1 - Project/2 - Database/database_dependencies/"
     data['db_conn_files'] = "apigenerator/resources/1 - Project/2 - Database/database_conn_files/"
     data['db_conn_resolvers'] = "apigenerator/resources/1 - Project/2 - Database/conn_resolvers/"
+    data['db_repositories'] = "apigenerator/resources/1 - Project/2 - Database/db_repositories/"
     return data
 
 

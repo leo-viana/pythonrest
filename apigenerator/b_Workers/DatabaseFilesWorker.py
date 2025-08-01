@@ -6,6 +6,7 @@ directories = get_directory_data()
 db_dependencies = directories['db_dependencies']
 db_conn_files = directories['db_conn_files']
 db_conn_resolvers = directories['db_conn_resolvers']
+db_repositories = directories['db_repositories']
 
 
 def install_database_files(result_full_path, db, script_absolute_path, db_authentication_method=None):
@@ -19,12 +20,18 @@ def install_database_files(result_full_path, db, script_absolute_path, db_authen
 
         copy_database_files(os.path.join(script_absolute_path, '{}/{}'.format(db_conn_resolvers, db)),
                             os.path.join(result_full_path, 'src', 'e_Infra', 'c_Resolvers'))
+
+        copy_database_files(os.path.join(script_absolute_path, '{}/{}'.format(db_repositories, db)),
+                            os.path.join(result_full_path, 'src', 'd_Repository'))
     else:
         copy_database_files(os.path.join(script_absolute_path, '{}/{}/{}'.format(db_conn_files, db, db_authentication_method)),
                             os.path.join(result_full_path, 'src', 'd_Repository', 'd_DbConnection'))
 
         copy_database_files(os.path.join(script_absolute_path, '{}/{}'.format(db_conn_resolvers, db)),
                             os.path.join(result_full_path, 'src', 'e_Infra', 'c_Resolvers'))
+
+        copy_database_files(os.path.join(script_absolute_path, '{}/{}'.format(db_repositories, db)),
+                            os.path.join(result_full_path, 'src', 'd_Repository'))
 
     if db == 'mysql':
         if 'ssh' in db_authentication_method:
