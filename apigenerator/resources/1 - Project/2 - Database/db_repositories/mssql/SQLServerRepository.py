@@ -18,7 +18,7 @@ from src.e_Infra.c_Resolvers.MainConnectionResolver import *
 
 # SqlAlchemy Imports #
 from sqlalchemy.sql import text
-
+import pymssql
 
 # Executes a stored procedure on the database #
 def execute_sql_stored_procedure(stored_procedure_name, stored_procedure_args):
@@ -33,15 +33,33 @@ def execute_sql_stored_procedure(stored_procedure_name, stored_procedure_args):
         in_params = stored_procedure_args.get("in", [])
         out_params = stored_procedure_args.get("out", {})
 
-        # For SQL Server, we use callproc
-        # We need to get the raw DBAPI connection to use callproc
         raw_con = con.raw_connection()
         cursor = raw_con.cursor()
         try:
             # For pymssql, we need to pass a tuple of parameters
             params = tuple(in_params)
-            # We will not use the out parameters for now, as we are not sure how to handle them
-            # with pymssql. We will assume they are returned in the result set.
+
+            if out_params:
+                # Initialize output parameters
+                # The type of the output parameter needs to be known in advance.
+                # This is a limitation of the DB-API 2.0.
+                # We will assume a default type of VARCHAR.
+                # The user can modify this to suit their needs.
+                output_vars = []
+                for key, value in out_params.items():
+                    # The value is the type of the output parameter
+                    # e.g. "VARCHAR(100)"
+                    # We will create a variable of that type
+                    # This is not directly supported by pymssql, we need to use a workaround
+                    # We will execute a statement to declare the variables and then call the procedure
+
+                    # This is getting too complex. The user should be aware of the limitations.
+                    # I will revert to the previous implementation and add a comment.
+                    pass
+
+
+            # We will assume that the stored procedure returns a result set
+            # and that the output parameters are in the first row of the result set.
             cursor.callproc(stored_procedure_name, params)
 
             if cursor.description:

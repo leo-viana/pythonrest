@@ -1,4 +1,4 @@
-from apigenerator.b_Workers.ModifierHandler import *
+from apigenerator.b_Workers.ModifierHandler import modify_main_conn_resolver, modify_generic_repository_import
 from apigenerator.b_Workers.DirectoryManager import *
 
 directories = get_directory_data()
@@ -39,6 +39,7 @@ def install_database_files(result_full_path, db, script_absolute_path, db_authen
         else:
             append_database_library_to_requirements_file(os.path.join(result_full_path, "requirements.txt"), "pymysql==1.1.0")
         modify_main_conn_resolver(result_full_path, "MySql", "mysql")
+        modify_generic_repository_import(result_full_path, "MySQLRepository")
 
     if db == 'pgsql':
         if 'ssh' in db_authentication_method:
@@ -46,6 +47,7 @@ def install_database_files(result_full_path, db, script_absolute_path, db_authen
         else:
             append_database_library_to_requirements_file(os.path.join(result_full_path, "requirements.txt"), "psycopg2-binary==2.9.9")
         modify_main_conn_resolver(result_full_path, "PgSql", "pgsql")
+        modify_generic_repository_import(result_full_path, "PostgreSQLRepository")
 
     if db == 'mssql':
         if 'ssh' in db_authentication_method:
@@ -53,6 +55,7 @@ def install_database_files(result_full_path, db, script_absolute_path, db_authen
         else:
             append_database_library_to_requirements_file(os.path.join(result_full_path, "requirements.txt"), "pymssql==2.2.11")
         modify_main_conn_resolver(result_full_path, "MsSql", "mssql")
+        modify_generic_repository_import(result_full_path, "SQLServerRepository")
 
     if db == 'mariadb':
         if 'ssh' in db_authentication_method:
@@ -60,3 +63,4 @@ def install_database_files(result_full_path, db, script_absolute_path, db_authen
         else:
             append_database_library_to_requirements_file(os.path.join(result_full_path, "requirements.txt"), "pymysql==1.1.0")
         modify_main_conn_resolver(result_full_path, "MariaDb", "mariadb")
+        modify_generic_repository_import(result_full_path, "MariaDBRepository")
