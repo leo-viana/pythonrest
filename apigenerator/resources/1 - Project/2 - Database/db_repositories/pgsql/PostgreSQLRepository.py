@@ -19,6 +19,8 @@ from src.e_Infra.c_Resolvers.MainConnectionResolver import *
 # SqlAlchemy Imports #
 from sqlalchemy.sql import text
 
+# Global Variables Imports #
+from src.e_Infra.GlobalVariablesManager import get_global_variable
 
 # Executes a stored procedure on the database #
 def execute_sql_stored_procedure(stored_procedure_name, stored_procedure_args):
@@ -30,67 +32,40 @@ def execute_sql_stored_procedure(stored_procedure_name, stored_procedure_args):
         return handle_custom_exception(get_system_message('invalid_connection_parameters'))
 
     with engine.connect() as con:
-        in_params = stored_procedure_args.get("in", [])
-        out_params = stored_procedure_args.get("out", {})
+        in_params = stored_procedure_args.get("in", []) or []
+        out_count = stored_procedure_args.get("out", 0) or 0
 
-        if out_params:
-            # Start a PL/pgSQL block
-            sql_block = "DO $$ DECLARE "
-            # Declare variables for OUT parameters
-            for key, value in out_params.items():
-                # Assuming the type can be inferred or is text. This might need adjustment.
-                sql_block += f"{key} {value%}; "
-            sql_block += "BEGIN "
-            # Construct the CALL statement
-            in_values = ', '.join([f"'{v}'" for v in in_params])
-            out_keys = ', '.join(out_params.keys())
-            sql_block += f"CALL {stored_procedure_name}({in_values}, {out_keys}); "
-            # Raise a notice with the JSON of the OUT parameters
-            json_out_params = ", ".join([f"'{key}', {key}" for key in out_params.keys()])
-            sql_block += f"RAISE NOTICE '%', json_build_object({json_out_params}); "
-            sql_block += "END $$;"
+        # Build placeholders for IN params, then append NULL for each OUT slot requested
+        placeholders = [f":p{i}" for i in range(len(in_params))]
+        try:
+            out_n = int(out_count)
+        except Exception:
+            out_n = 0
+        if out_n > 0:
+            placeholders.extend(["NULL"] * out_n)
 
-            call_proc = text(sql_block)
-        else:
-            in_values = ', '.join([f"'{value}'" for value in in_params])
-            call_proc = text(f"CALL {stored_procedure_name}({in_values})")
+
+        # Compose SQL and bind parameters safely
+        call_sql = (
+            f"CALL {stored_procedure_name}({', '.join(placeholders)})" if placeholders
+            else f"CALL {stored_procedure_name}()"
+        )
+        bind_params = {f"p{i}": v for i, v in enumerate(in_params)}
 
         try:
-            stored_procedure_result = con.execute(call_proc)
+            stored_procedure_result = con.execute(text(call_sql), bind_params)
             con.commit()
         except Exception as e:
             return handle_custom_exception(e)
 
-        if out_params:
-            # The result is in the NOTICE
-            # This is a bit of a hack, but it's the most reliable way to get the OUT parameters
-            # without knowing the return type of the procedure.
-            # The notice is in the format: '{"key1": "value1", "key2": "value2"}'
-            # We need to parse this to get the values.
-            # The notice is in the `info` attribute of the connection.
-            # However, SQLAlchemy does not expose this directly.
-            # We will assume the last notice is the one we want.
-            # This is not ideal, but it's the best we can do without more information.
-            # The user can modify this to suit their needs.
-
-            # The notice is not directly accessible. We will return the result of the call.
-            # The user should modify the stored procedure to return a result set.
-            # For now, we return a success message.
-            return build_proxy_response_insert_dumps(
-                200, {get_system_message('message'): get_system_message('query_success')}
-            )
-
-        cursor = stored_procedure_result.cursor
+        cursor = stored_procedure_result.cursor if hasattr(stored_procedure_result, 'cursor') else None
 
         if cursor is not None and cursor.description:
             result = get_result_list(stored_procedure_result, cursor)
-            return build_proxy_response_insert_dumps(
-                200, result
-            )
+            return build_proxy_response_insert_dumps(200, result)
         else:
             return build_proxy_response_insert_dumps(
-                200, {get_system_message(
-                    'message'): get_system_message('query_success')}
+                200, {get_system_message('message'): get_system_message('query_success')}
             )
 
 
