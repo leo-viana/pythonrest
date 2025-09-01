@@ -933,6 +933,99 @@ The generated API has a structure of a number of directories with sub-directorie
   - src/e_Infra/GlobalVariablesManager.py: Contains a function to call the environment variables if they exist or None if they don't.
   - src/g_Tests: Directory to store the UnitTests created to test the project's functionalities.
 
+# Using Stored Procedures
+
+PythonREST exposes a generic endpoint to execute database stored procedures. This lets you invoke procedures without writing custom controllers for each one.
+
+## Endpoint
+- Method: POST
+- Route: `/sql/storedprocedure`
+- **Header**: `StoredProcedure: <procedure_name>`
+  - For PostgreSQL, you can pass either `schema.procedure` or just `procedure`. If schema is omitted, the API will use the environment variable `pgsql_schema`.
+
+## Request Body
+Send a JSON object with the following keys:
+
+- **in**: Array of input parameter values in positional order.
+- **out**: Indicates outputs behavior, which varies by database type:
+  - **PostgreSQL**: A number representing how many OUT/INOUT “slots” to include. The API appends that many `NULL` placeholders after the IN params to satisfy the signature. Outputs are not captured in the response in this mode; the endpoint will return either a result set (if your procedure produces one) or a success message.
+  - **MySQL/MariaDB**: An object mapping output variable names to initial values/types. The API uses session variables (e.g. `@out_var`) to receive OUT values and returns them as JSON.
+  - **SQL Server**: IN params are supported. Returning outputs depends on your procedure returning a result set. Dedicated OUT variables are not fully supported at this time.
+
+## Behavior by Database
+
+### PostgreSQL
+- The API builds: `CALL <qualified_name>(:p0, :p1, ..., NULL, NULL, ...)` using bound parameters for IN values and literal `NULL` for requested OUT count.
+- If you pass just `procedure` in the header, the API uses `pgsql_schema` to schema-qualify, e.g. `myschema.procedure`.
+- OUT/INOUT values aren’t currently captured in the response. If your procedure returns a result set, it will be returned; otherwise, a success message is returned.
+
+Example:
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "StoredProcedure: my_schema.my_procedure" \
+  -d '{
+    "in": ["01K1GJ4VA45RWEP606THZ9Z9Z4", 42],
+    "out": 1
+  }' \
+  http://localhost:5000/sql/storedprocedure
+```
+Notes:
+- Use values in the exact positional order expected by the procedure.
+- If you omit the schema, set the env variable `pgsql_schema` in your generated API so the server can qualify the call.
+
+### MySQL/MariaDB
+- The API sets session variables for each OUT entry you provide, then executes `CALL proc(in_params..., @out1, @out2, ...)` and finally selects those variables to return them as JSON.
+
+Example:
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "StoredProcedure: my_database.my_procedure" \
+  -d '{
+    "in": ["abc", 10],
+    "out": { "out_value": 0, "out_status": 0 }
+  }' \
+  http://localhost:5000/sql/storedprocedure
+```
+Response example:
+```json
+{
+  "out_value": 123,
+  "out_status": 1
+}
+```
+
+### SQL Server
+- The API calls the procedure with a tuple of IN parameters. If your procedure returns a result set, it will be returned. Explicit OUT parameter capture is not currently implemented.
+
+Example:
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "StoredProcedure: dbo.MyProcedure" \
+  -d '{
+    "in": ["abc", 10],
+    "out": 0
+  }' \
+  http://localhost:5000/sql/storedprocedure
+```
+
+## Tips and Gotchas
+- **Schema qualification (PostgreSQL)**: Prefer `schema.procedure` in the header. If omitted, configure `pgsql_schema` in your generated API environment (src/e_Infra/g_Environment) so the server resolves the correct schema.
+- **Overloaded procedures**: If your database has multiple overloads, make sure your IN values match the expected parameter types to avoid ambiguous resolution. Bound parameters help, but some types (e.g., UUID) should be passed in the correct format.
+- **Outputs on PostgreSQL**: Current implementation uses a numeric `out` to place NULL placeholders only and does not capture OUT/INOUT values in the response. If you need to capture and return OUT values, consider adjusting your procedure to return rows, or we can enhance the endpoint later with a DO block to collect OUTs.
+- **Security**: IN parameters are passed as bound parameters where supported to avoid SQL injection and improve type handling.
+
+## Quick Reference
+- Route: `POST /sql/storedprocedure`
+- Header: `StoredProcedure: <schema.optional>.<procedure>`
+- Body:
+  - PostgreSQL: `{ "in": [...], "out": <number_of_out_params> }`
+  - MySQL/MariaDB: `{ "in": [...], "out": { "outVar": <init>, ... } }`
+  - SQL Server: `{ "in": [...], "out": 0 }`
+
+
 ## Requirements
 
 Already listed within ./requirements.txt
