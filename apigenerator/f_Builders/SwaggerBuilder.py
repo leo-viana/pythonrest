@@ -56,7 +56,8 @@ def build_swagger_yaml(script_absolute_path, domain_obj, data, id_from_file):
     # Iterating over domain objects to populate properties #
     for attr in domain_obj.attr_list:
         properties[attr.row_attr] = {"type": attr.attr_type if hasattr(attr, 'attr_type') else 'string'}
-        if not attr.is_nullable:
+        # Do not require primary key on POST; it's typically auto-generated (UUID/ULID or DB default)
+        if not attr.is_nullable and not attr.is_primary_key:
             required_for_post.append(attr.row_attr)
         if attr.is_primary_key:
             required_for_patch.append(attr.row_attr)
