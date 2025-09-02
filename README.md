@@ -997,18 +997,76 @@ Response example:
 ```
 
 ### SQL Server
-- The API calls the procedure with a tuple of IN parameters. If your procedure returns a result set, it will be returned. Explicit OUT parameter capture is not currently implemented.
+- The API executes the procedure with bound IN parameters and appends literal NULL placeholders for a numeric `out` count (same pattern as PostgreSQL).
+- OUT/INOUT values are not captured; if the procedure returns a result set, it will be returned; otherwise a success message is returned.
 
-Example:
+Example (IN only):
 ```bash
 curl -X POST \
   -H "Content-Type: application/json" \
-  -H "StoredProcedure: dbo.MyProcedure" \
+  -H "StoredProcedure: MyProcedure" \
   -d '{
     "in": ["abc", 10],
     "out": 0
   }' \
   http://localhost:5000/sql/storedprocedure
+```
+
+Example (IN + OUT slots):
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "StoredProcedure: sp_GetUserStats" \
+  -d '{
+    "in": ["john_doe"],
+    "out": 4
+  }' \
+  http://localhost:5000/sql/storedprocedure
+```
+
+Example (JSON string parameter):
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "StoredProcedure: sp_BulkInsertUsers" \
+  -d '{
+    "in": ["[{\"username\":\"user1\",\"id\":\"uuid1\"},{\"username\":\"user2\",\"id\":\"uuid2\"}]"],
+    "out": 0
+  }' \
+  http://localhost:5000/sql/storedprocedure
+```
+
+#### SQL Server: Key Rules and Examples
+- All parameters must be provided (include optional ones; use null to accept defaults)
+- Parameters are positional in the "in" array
+- Use null to accept default parameter values
+- The numeric "out" adds NULL placeholders (outputs aren’t returned)
+- Booleans: use 1 for true, 0 for false
+- Dates as strings: "YYYY-MM-DD"
+
+Examples (body only):
+```json
+{"in": [], "out": 0}                                 // sp_GetDatabaseStats
+{"in": ["john_doe"], "out": 0}                      // sp_GetUserPosts
+{"in": ["2024-01-01", "2024-12-31", 50], "out": 0} // sp_GetPostsByDateRange
+{"in": [], "out": 3}                                  // sp_GetDatabaseInfo (OUT slots)
+{"in": ["john_doe"], "out": 4}                       // sp_GetUserStats (OUT slots)
+{"in": ["john_doe"], "out": 1}                       // sp_UpdateUserJoinDate (INOUT as OUT slot)
+{"in": ["[{\"username\":\"user1\",\"id\":\"uuid1\"}]"], "out": 0} // sp_BulkInsertUsers
+{"in": ["hello world", 1, 1, 25], "out": 0}         // sp_SearchPosts
+{"in": ["new_user", "new-uuid-here"], "out": 2}     // sp_CreateUser (OUT slots)
+{"in": ["followers", 20], "out": 0}                  // sp_GetTopUsers
+{"in": [], "out": 1}                                  // sp_ProcessAllUsers (OUT slot)
+{"in": ["john_doe", 7], "out": 0}                    // sp_GetUserActivityReport
+{"in": ["john_doe", 3], "out": 0}                    // sp_GetUserNetwork
+```
+
+See the full guide with more variations in `STORED_PROCEDURES_API_TESTING_GUIDE.md`.
+
+To batch-run these calls locally, use the helper script we provide:
+```bash
+pip install requests
+python tests/tests_procedures.py
 ```
 
 ## Tips and Gotchas

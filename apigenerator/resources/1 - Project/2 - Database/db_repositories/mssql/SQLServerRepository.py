@@ -20,6 +20,8 @@ from src.e_Infra.c_Resolvers.MainConnectionResolver import *
 from sqlalchemy.sql import text
 import pymssql
 
+
+
 # Executes a stored procedure on the database #
 def execute_sql_stored_procedure(stored_procedure_name, stored_procedure_args):
     try:
@@ -30,57 +32,40 @@ def execute_sql_stored_procedure(stored_procedure_name, stored_procedure_args):
         return handle_custom_exception(get_system_message('invalid_connection_parameters'))
 
     with engine.connect() as con:
-        in_params = stored_procedure_args.get("in", [])
-        out_params = stored_procedure_args.get("out", {})
+        in_params = stored_procedure_args.get("in", []) or []
+        out_count = stored_procedure_args.get("out", 0) or 0
 
-        raw_con = con.raw_connection()
-        cursor = raw_con.cursor()
+        # Build placeholders for IN params, then append NULL for each OUT slot requested
+        placeholders = [f":p{i}" for i in range(len(in_params))]
         try:
-            # For pymssql, we need to pass a tuple of parameters
-            params = tuple(in_params)
+            out_n = int(out_count)
+        except Exception:
+            out_n = 0
+        if out_n > 0:
+            placeholders.extend(["NULL"] * out_n)
 
-            if out_params:
-                # Initialize output parameters
-                # The type of the output parameter needs to be known in advance.
-                # This is a limitation of the DB-API 2.0.
-                # We will assume a default type of VARCHAR.
-                # The user can modify this to suit their needs.
-                output_vars = []
-                for key, value in out_params.items():
-                    # The value is the type of the output parameter
-                    # e.g. "VARCHAR(100)"
-                    # We will create a variable of that type
-                    # This is not directly supported by pymssql, we need to use a workaround
-                    # We will execute a statement to declare the variables and then call the procedure
+        # Compose SQL and bind parameters safely (EXEC for SQL Server)
+        exec_sql = (
+            f"EXEC {stored_procedure_name} {', '.join(placeholders)}" if placeholders
+            else f"EXEC {stored_procedure_name}"
+        )
+        bind_params = {f"p{i}": v for i, v in enumerate(in_params)}
 
-                    # This is getting too complex. The user should be aware of the limitations.
-                    # I will revert to the previous implementation and add a comment.
-                    pass
+        try:
+            stored_procedure_result = con.execute(text(exec_sql), bind_params)
+            con.commit()
+        except Exception as e:
+            return handle_custom_exception(e)
 
+        cursor = stored_procedure_result.cursor if hasattr(stored_procedure_result, 'cursor') else None
 
-            # We will assume that the stored procedure returns a result set
-            # and that the output parameters are in the first row of the result set.
-            cursor.callproc(stored_procedure_name, params)
-
-            if cursor.description:
-                result = get_result_list(cursor, cursor)
-                if out_params:
-                    return build_proxy_response_insert_dumps(
-                        200, result[0]
-                    )
-                return build_proxy_response_insert_dumps(
-                    200, result
-                )
-            else:
-                 return build_proxy_response_insert_dumps(
-                    200, {get_system_message(
-                        'message'): get_system_message('query_success')}
-                )
-
-            raw_con.commit()
-        finally:
-            cursor.close()
-            raw_con.close()
+        if cursor is not None and cursor.description:
+            result = get_result_list(stored_procedure_result, cursor)
+            return build_proxy_response_insert_dumps(200, result)
+        else:
+            return build_proxy_response_insert_dumps(
+                200, {get_system_message('message'): get_system_message('query_success')}
+            )
 
 
 # Method that retrieves a result list from database
