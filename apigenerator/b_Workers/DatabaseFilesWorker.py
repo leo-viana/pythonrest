@@ -1,4 +1,4 @@
-from apigenerator.b_Workers.ModifierHandler import *
+from apigenerator.b_Workers.ModifierHandler import modify_main_conn_resolver, modify_generic_repository_import
 from apigenerator.b_Workers.DirectoryManager import *
 
 directories = get_directory_data()
@@ -6,6 +6,7 @@ directories = get_directory_data()
 db_dependencies = directories['db_dependencies']
 db_conn_files = directories['db_conn_files']
 db_conn_resolvers = directories['db_conn_resolvers']
+db_repositories = directories['db_repositories']
 
 
 def install_database_files(result_full_path, db, script_absolute_path, db_authentication_method=None):
@@ -19,6 +20,9 @@ def install_database_files(result_full_path, db, script_absolute_path, db_authen
 
         copy_database_files(os.path.join(script_absolute_path, '{}/{}'.format(db_conn_resolvers, db)),
                             os.path.join(result_full_path, 'src', 'e_Infra', 'c_Resolvers'))
+
+        copy_database_files(os.path.join(script_absolute_path, '{}/{}'.format(db_repositories, db)),
+                            os.path.join(result_full_path, 'src', 'd_Repository'))
     else:
         copy_database_files(os.path.join(script_absolute_path, '{}/{}/{}'.format(db_conn_files, db, db_authentication_method)),
                             os.path.join(result_full_path, 'src', 'd_Repository', 'd_DbConnection'))
@@ -26,12 +30,16 @@ def install_database_files(result_full_path, db, script_absolute_path, db_authen
         copy_database_files(os.path.join(script_absolute_path, '{}/{}'.format(db_conn_resolvers, db)),
                             os.path.join(result_full_path, 'src', 'e_Infra', 'c_Resolvers'))
 
+        copy_database_files(os.path.join(script_absolute_path, '{}/{}'.format(db_repositories, db)),
+                            os.path.join(result_full_path, 'src', 'd_Repository'))
+
     if db == 'mysql':
         if 'ssh' in db_authentication_method:
             append_database_library_to_requirements_file(os.path.join(result_full_path, "requirements.txt"), "pymysql==1.1.0\nsshtunnel==0.4.0")
         else:
             append_database_library_to_requirements_file(os.path.join(result_full_path, "requirements.txt"), "pymysql==1.1.0")
         modify_main_conn_resolver(result_full_path, "MySql", "mysql")
+        modify_generic_repository_import(result_full_path, "MySQLRepository")
 
     if db == 'pgsql':
         if 'ssh' in db_authentication_method:
@@ -39,6 +47,7 @@ def install_database_files(result_full_path, db, script_absolute_path, db_authen
         else:
             append_database_library_to_requirements_file(os.path.join(result_full_path, "requirements.txt"), "psycopg2-binary==2.9.9")
         modify_main_conn_resolver(result_full_path, "PgSql", "pgsql")
+        modify_generic_repository_import(result_full_path, "PostgreSQLRepository")
 
     if db == 'mssql':
         if 'ssh' in db_authentication_method:
@@ -46,6 +55,7 @@ def install_database_files(result_full_path, db, script_absolute_path, db_authen
         else:
             append_database_library_to_requirements_file(os.path.join(result_full_path, "requirements.txt"), "pymssql==2.2.11")
         modify_main_conn_resolver(result_full_path, "MsSql", "mssql")
+        modify_generic_repository_import(result_full_path, "SQLServerRepository")
 
     if db == 'mariadb':
         if 'ssh' in db_authentication_method:
@@ -53,3 +63,4 @@ def install_database_files(result_full_path, db, script_absolute_path, db_authen
         else:
             append_database_library_to_requirements_file(os.path.join(result_full_path, "requirements.txt"), "pymysql==1.1.0")
         modify_main_conn_resolver(result_full_path, "MariaDb", "mariadb")
+        modify_generic_repository_import(result_full_path, "MariaDBRepository")

@@ -41,6 +41,20 @@ def modify_main_conn_resolver(result_full_path, db_meta, db_string):
             main_conn_out.write(line)
 
 
+def modify_generic_repository_import(result_path, repository_name):
+    file_path = os.path.join(result_path, 'src', 'd_Repository', 'GenericRepository.py')
+    with open(file_path, 'r') as file:
+        file_text = file.read()
+
+    file_text = file_text.replace(
+        "from src.d_Repository.MySQLRepository import execute_sql_stored_procedure",
+        f"from src.d_Repository.{repository_name} import execute_sql_stored_procedure"
+    )
+
+    with open(file_path, 'w') as file:
+        file.write(file_text)
+
+
 def modify_domain_files_no_pk(result):
     for file in listdir(os.path.join(result, 'src', 'c_Domain')):
         if not file.startswith('_'):

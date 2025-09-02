@@ -206,15 +206,22 @@ def apply_query_selecting_multiple_values(query, query_param, key, declarative_m
 
 
 def auto_fill_guid_in_request_body(declarative_meta, dictionary):
-    auto_fill_guid_allowed_types = {'CHAR(36)', 'UUID', 'VARCHAR(36)'}
+    # Allow auto-fill for common ID types, including 26-char ULID-compatible and 36-char UUID types
+    uuid_allowed = {'CHAR(36)', 'VARCHAR(36)'}
+    ulid_allowed = {'CHAR(26)', 'VARCHAR(26)'}
     ins = inspect(declarative_meta)
     for column in ins.tables[0].columns:
-        if column.primary_key:
-            if column.name not in dictionary:
-                if str(column.type) == 'UUID':
-                    dictionary[column.name] = generate_uuidv7()
-                elif str(column.type) in auto_fill_guid_allowed_types:
-                    dictionary[column.name] = generate_guid()
+        if column.primary_key and column.name not in dictionary:
+            col_type = str(column.type)
+            if col_type == 'UUID':
+                # Use time-ordered UUIDv7 for UUID columns
+                dictionary[column.name] = generate_uuidv7()
+            elif col_type in uuid_allowed:
+                # 36-char columns: use UUIDv7
+                dictionary[column.name] = generate_uuidv7()
+            elif col_type in ulid_allowed:
+                # 26-char columns: use ULID
+                dictionary[column.name] = generate_ulid()
 
 
 def get_select_query_args(header_args, declarative_meta):
